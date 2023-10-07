@@ -1,0 +1,27 @@
+from data.utils import check_dir
+from train.argument import parse_train_args
+from train.eval_from_output import eval_from_output
+
+LOG_DIR = 'log/eval'
+eval_datasets = [
+    '../Placement-datasets/dac2012/superblue2',
+    # '../Placement-datasets/dac2012/superblue3',
+    # '../Placement-datasets/dac2012/superblue6',
+    # '../Placement-datasets/dac2012/superblue7',
+    # '../Placement-datasets/dac2012/superblue9',
+]
+eval_tokens = [
+#     'xpre',
+    'refine-xpre',
+]
+
+if __name__ == '__main__':
+    check_dir(LOG_DIR)
+    args = parse_train_args()
+    eval_from_output(
+        name='superblue2-refine',
+        args=args,
+        eval_datasets=eval_datasets,
+        eval_tokens=eval_tokens,
+        log_dir=LOG_DIR,
+    )

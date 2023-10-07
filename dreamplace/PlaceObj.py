@@ -268,7 +268,44 @@ class PlaceObj(nn.Module):
         else:
             self.routability_Lsub_iteration = self.Lsub_iteration
         self.start_fence_region_density = False
+        ############ add anchor loss
+        self._anchor_pos = None
+        self.num_physical_nodes = placedb.num_physical_nodes
+        self.num_nodes = placedb.num_nodes
+        self.dtype = placedb.dtype
+        self.node_x = placedb.node_x
+        self.node_y = placedb.node_y
+        self.anchor_weight = 1e-2
+        self.params = params
+        self.loss_mask = torch.zeros(self.num_nodes * 2).to(self.data_collections.pos[0].device)
+        self.num_movable_nodes = placedb.num_movable_nodes
+        self.loss_mask[:self.num_movable_nodes] = 1
+        self.loss_mask[self.num_nodes:self.num_nodes + 
+                        self.num_movable_nodes] = 1
+        self.anchor = torch.tensor([self.placedb.xh,self.placedb.yh],device=self.data_collections.pos[0].device)*0.05 * torch.ones([self.num_nodes,2],device=self.data_collections.pos[0].device)
+        self.anchor = self.anchor.view(-1)
+        self.anchor_list = []
+        self.loss_list = []
+        ############ add anchor loss
+############ add anchor loss
+    @property
+    def anchor_pos(self):
+        if self._anchor_pos is not None:
+            return self._anchor_pos
+        self._anchor_pos = np.zeros(self.num_nodes * 2, dtype=self.dtype)
+        self._anchor_pos[0:self.num_physical_nodes] = self.node_x
+        self._anchor_pos[self.num_nodes:self.num_nodes +
+                      self.num_physical_nodes] = self.node_y
+        # netlist_name = sys.argv[1].split('/')[-1].split('.')[0]
+        init_pos = np.load(self.params.init_pos_dir)#test-traincellflow
+        self._anchor_pos[0:self.num_movable_nodes] = init_pos[:self.num_movable_nodes,0]
+        self._anchor_pos[self.num_nodes:self.num_nodes + 
+                        self.num_movable_nodes] = init_pos[:self.num_movable_nodes,1]
+        self._anchor_pos = torch.from_numpy(self._anchor_pos).to(self.data_collections.pos[0].device)
+        # self._anchor_pos = self.op_collections.legalize_op(self._anchor_pos)
+        return self._anchor_pos
 
+############ add anchor loss
 
     def obj_fn(self, pos):
         """
@@ -296,6 +333,22 @@ class PlaceObj(nn.Module):
             result = self.wirelength + self.density_weight.dot(self.density)
         else:
             result = torch.add(self.wirelength, self.density, alpha=(self.density_factor * self.density_weight).item())
+        ############ add anchor loss
+        anchor_loss = 0
+        if hasattr(self.params,'init_pos_dir'):
+            # delta = torch.nn.functional.leaky_relu(torch.abs(pos - self.anchor_pos) - self.anchor,negative_slope=0.01)
+            # # self.anchor_weight = float(self.density_factor * self.density_weight)
+            # # anchor_loss = torch.nn.functional.l1_loss(torch.ones_like(delta,device=pos.device)*-1e4,delta,reduction='sum')
+            # anchor_loss = torch.sum(delta * self.loss_mask)
+            # result = torch.add(result,anchor_loss,alpha = self.anchor_weight)
+            # self.anchor_weight*=0.98
+            # self.anchor_list.append(float(anchor_loss / self.num_physical_nodes))
+            anchor_loss *= self.anchor_weight 
+        # self.loss_list.append([float(self.wirelength),float(self.density),float(self.density_factor * self.density_weight)])
+            # logging.info(f"anchor loss {(anchor_loss * self.anchor_weight).data}")
+            # logging.info(f"wirelength loss {self.wirelength.data}")
+            # logging.info(f"density loss {(self.density * self.density_factor * self.density_weight).data}")
+        ############ add anchor loss
 
         return result
 

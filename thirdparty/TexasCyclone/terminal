@@ -1,0 +1,12 @@
+# pretrain
+python script_pretrain_ours.py
+
+# train
+python script_train_ours.py
+python script_train_ours.py --name xpre --model ""
+
+# refine
+python script_refine_output.py
+python script_eval_from_output.py
+
+ps -ef | grep defunct | more

@@ -161,6 +161,10 @@ class NonLinearPlace(BasicPlace.BasicPlace):
 
                 # stopping criteria
                 def Lgamma_stop_criterion(Lgamma_step, metrics, stop_mask=None):
+                    ################
+                    if hasattr(params,'init_pos_dir'):
+                        return False
+                    ################
                     with torch.no_grad():
                         if len(metrics) > 1:
                             cur_metric = metrics[-1][-1][-1]
@@ -204,6 +208,10 @@ class NonLinearPlace(BasicPlace.BasicPlace):
                         return False
 
                 def Llambda_stop_criterion(Lgamma_step, Llambda_density_weight_step, metrics):
+                    ################
+                    if hasattr(params,'init_pos_dir'):
+                        return False
+                    ################
                     with torch.no_grad():
                         if len(metrics) > 1:
                             cur_metric = metrics[-1][-1]
@@ -233,6 +241,10 @@ class NonLinearPlace(BasicPlace.BasicPlace):
                 moving_avg_window = max(min(model.Lsub_iteration // 2, 3), 1)
 
                 def Lsub_stop_criterion(Lgamma_step, Llambda_density_weight_step, Lsub_step, metrics):
+                    ################
+                    if hasattr(params,'init_pos_dir'):
+                        return False
+                    ################
                     with torch.no_grad():
                         if len(metrics) >= moving_avg_window * 2:
                             cur_avg_obj = 0
@@ -369,12 +381,20 @@ class NonLinearPlace(BasicPlace.BasicPlace):
                     logging.info("full step %.3f ms" % ((time.time() - t0) * 1000))
 
                 def check_plateau(x, window=10, threshold=0.001):
+                    ################
+                    if hasattr(params,'init_pos_dir'):
+                        return False
+                    ################
                     if len(x) < window:
                         return False
                     x = x[-window:]
                     return (np.max(x) - np.min(x)) / np.mean(x) < threshold
 
                 def check_divergence(x, window=50, threshold=0.05):
+                    ################
+                    if hasattr(params,'init_pos_dir'):
+                        return False
+                    ################
                     if len(x) < window or best_metric[0] is None:
                         return False
                     x = np.array(x[-window:])
@@ -655,6 +675,7 @@ class NonLinearPlace(BasicPlace.BasicPlace):
                 #     all_metrics.append([best_metric])
 
                 logging.info("optimizer %s takes %.3f seconds" % (optimizer_name, time.time() - tt))
+                optimizer_time = time.time() - tt
 
             # recover node size and pin offset for legalization, since node size is adjusted in global placement
             if params.routability_opt_flag:
@@ -748,6 +769,23 @@ class NonLinearPlace(BasicPlace.BasicPlace):
             cur_pos[0 : placedb.num_movable_nodes],
             cur_pos[placedb.num_nodes : placedb.num_nodes + placedb.num_movable_nodes],
         )
+        ###############
+        print(cur_pos[:placedb.num_physical_nodes],cur_pos[placedb.num_nodes : placedb.num_nodes + placedb.num_physical_nodes])
+        print("True HPWL %.6E" % (self.op_collections.hpwl_op(self.pos[0]).data / params.scale_factor))
+        if not params.global_place_flag:
+            optimizer_time = -1
+        print(f"optimizer takes {optimizer_time} s")
+        if hasattr(params,'save_gp_dir'):
+            save_gp_path = f"{params.save_gp_dir}.gp.{params.solution_file_suffix()}"
+            placedb.write(params,save_gp_path)
+        if len(all_metrics) > 0:
+            all_metrics[-1].optimizer_time = optimizer_time
+            all_metrics[-1].true_hpwl = self.op_collections.hpwl_op(self.pos[0]).data / params.scale_factor
+        else:
+            all_metrics.append(EvalMetrics.EvalMetrics(0))
+            all_metrics[-1].optimizer_time = optimizer_time
+            all_metrics[-1].true_hpwl = self.op_collections.hpwl_op(self.pos[0]).data / params.scale_factor
+        ###############
         # plot placement
         if params.plot_flag:
             self.plot(params, placedb, iteration, cur_pos)

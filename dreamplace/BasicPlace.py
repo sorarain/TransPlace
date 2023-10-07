@@ -294,6 +294,14 @@ class BasicPlace(nn.Module):
                               loc=(placedb.yl * 1.0 + placedb.yh * 1.0) / 2,
                               scale=(placedb.yh - placedb.yl) * 0.001,
                               size=placedb.num_movable_nodes)
+        #####################
+        self.random_center_init_flag = params.random_center_init_flag
+        if hasattr(params,'init_pos_dir'):
+            init_pos = np.load(params.init_pos_dir)
+            self.init_pos[0:placedb.num_movable_nodes] = init_pos[:placedb.num_movable_nodes,0]
+            self.init_pos[placedb.num_nodes:placedb.num_nodes + 
+                            placedb.num_movable_nodes] = init_pos[:placedb.num_movable_nodes,1]
+        #####################
 
         if placedb.num_filler_nodes:  # uniformly distribute filler cells in the layout
             if len(placedb.regions) > 0:
