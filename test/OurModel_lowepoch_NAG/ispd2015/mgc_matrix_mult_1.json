@@ -6,7 +6,7 @@
     "num_bins_x" : 256,
     "num_bins_y" : 256,
     "global_place_stages" : [
-        {"num_bins_x" : 256, "num_bins_y" : 256, "iteration" : 250, "learning_rate" : 0.1, "learning_rate_decay" : 0.997, "wirelength" : "weighted_average", "optimizer" : "nesterov"}
+        {"num_bins_x" : 256, "num_bins_y" : 256, "iteration" : 350, "learning_rate" : 0.1, "learning_rate_decay" : 0.997, "wirelength" : "weighted_average", "optimizer" : "nesterov"}
     ],
     "target_density" : 0.802,
     "density_weight" : 8e-5,

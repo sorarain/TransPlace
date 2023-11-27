@@ -1,14 +1,14 @@
 {
-"lef_input" : ["benchmarks/ispd2015/mgc_matrix_mult_a/tech.lef", "benchmarks/ispd2015/mgc_matrix_mult_a/cells.lef"],
-"def_input" : "benchmarks/ispd2015/mgc_matrix_mult_a/floorplan.def",
-"verilog_input" : "benchmarks/ispd2015/mgc_matrix_mult_a/design.v",
+"lef_input" : ["benchmarks/ispd2015/mgc_matrix_mult_2/tech.lef", "benchmarks/ispd2015/mgc_matrix_mult_2/cells.lef"],
+"def_input" : "benchmarks/ispd2015/mgc_matrix_mult_2/floorplan.def",
+"verilog_input" : "benchmarks/ispd2015/mgc_matrix_mult_2/design.v",
 "gpu" : 1,
 "num_bins_x" : 256,
 "num_bins_y" : 256,
 "global_place_stages" : [
-    {"num_bins_x" : 256, "num_bins_y" : 256, "iteration" : 240, "learning_rate" : 0.1, "learning_rate_decay" : 0.996, "wirelength" : "weighted_average", "optimizer" : "nesterov"}
+    {"num_bins_x" : 256, "num_bins_y" : 256, "iteration" : 320, "learning_rate" : 0.01, "learning_rate_decay" : 0.997, "wirelength" : "weighted_average", "optimizer" : "nesterov"}
 ],
-"target_density" : 1.00,
+"target_density" : 0.802,
 "density_weight" : 8e-4,
 "gamma" : 4.0,
 "random_seed" : 1000,
@@ -27,5 +27,5 @@
 "sort_nets_by_degree" : 0,
 "num_threads" : 8,
 "sol_file_format" : "DEF",
-"RePlAce_UPPER_PCOF":1.068
+"RePlAce_UPPER_PCOF": 1.068
 }

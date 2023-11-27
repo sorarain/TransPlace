@@ -1,14 +1,14 @@
 {
-"lef_input" : ["benchmarks/ispd2015/mgc_fft_a/tech.lef", "benchmarks/ispd2015/mgc_fft_a/cells.lef"],
-"def_input" : "benchmarks/ispd2015/mgc_fft_a/floorplan.def",
-"verilog_input" : "benchmarks/ispd2015/mgc_fft_a/design.v",
+"lef_input" : ["benchmarks/ispd2015/mgc_fft_2/tech.lef", "benchmarks/ispd2015/mgc_fft_2/cells.lef"],
+"def_input" : "benchmarks/ispd2015/mgc_fft_2/floorplan.def",
+"verilog_input" : "benchmarks/ispd2015/mgc_fft_2/design.v",
 "gpu" : 1,
 "num_bins_x" : 512,
 "num_bins_y" : 512,
 "global_place_stages" : [
-    {"num_bins_x" : 512, "num_bins_y" : 512, "iteration" : 80, "learning_rate" : 0.3, "learning_rate_decay" : 0.991,  "wirelength" : "weighted_average", "optimizer" : "adam"}
+    {"num_bins_x" : 512, "num_bins_y" : 512, "iteration" : 150, "learning_rate" : 0.3, "learning_rate_decay" : 0.99,  "wirelength" : "weighted_average", "optimizer" : "nesterov"}
 ],
-"target_density" : 0.50,
+"target_density" : 0.65,
 "density_weight" : 8e-3,
 "gamma" : 4.0,
 "random_seed" : 1000,
