@@ -48,6 +48,8 @@ if __name__ == '__main__':
         # 'test/ispd2019/lefdef/ispd19_test1.json',
         # 'test/ispd2019/lefdef/ispd19_test2.json',
         # 'test/ispd2019/lefdef/ispd19_test3.json',
+        f'{PARAM_DIR}/superblue11.json',
+        f'{PARAM_DIR}/superblue12.json',
         f'{PARAM_DIR}/superblue14.json',
         f'{PARAM_DIR}/superblue16.json',
         f'{PARAM_DIR}/superblue19.json',
@@ -69,6 +71,8 @@ if __name__ == '__main__':
         # f'{NETLIST_DIR}/ispd2019/ispd19_test1',
         # f'{NETLIST_DIR}/ispd2019/ispd19_test2',
         # f'{NETLIST_DIR}/ispd2019/ispd19_test3',
+        f'{NETLIST_DIR}/dac2012/superblue11',
+        f'{NETLIST_DIR}/dac2012/superblue12',
         f'{NETLIST_DIR}/dac2012/superblue14',
         f'{NETLIST_DIR}/dac2012/superblue16',
         f'{NETLIST_DIR}/dac2012/superblue19',
@@ -90,6 +94,8 @@ if __name__ == '__main__':
         # 'test/ispd2019/lefdef/ispd19_test1.json',
         # 'test/ispd2019/lefdef/ispd19_test2.json',
         # 'test/ispd2019/lefdef/ispd19_test3.json',
+        f'{PARAM_DIR}/superblue11.json',
+        f'{PARAM_DIR}/superblue12.json',
         f'{PARAM_DIR}/superblue14.json',
         f'{PARAM_DIR}/superblue16.json',
         f'{PARAM_DIR}/superblue19.json',
@@ -111,6 +117,8 @@ if __name__ == '__main__':
         # f'{NETLIST_DIR}/ispd2019/ispd19_test1',
         # f'{NETLIST_DIR}/ispd2019/ispd19_test2',
         # f'{NETLIST_DIR}/ispd2019/ispd19_test3',
+        f'{NETLIST_DIR}/dac2012/superblue11',
+        f'{NETLIST_DIR}/dac2012/superblue12',
         f'{NETLIST_DIR}/dac2012/superblue14',
         f'{NETLIST_DIR}/dac2012/superblue16',
         f'{NETLIST_DIR}/dac2012/superblue19',
@@ -133,6 +141,8 @@ if __name__ == '__main__':
         # 'test/ispd2019/lefdef/ispd19_test1.json',
         # 'test/ispd2019/lefdef/ispd19_test2.json',
         # 'test/ispd2019/lefdef/ispd19_test3.json',
+        f'{PARAM_DIR}/superblue11.json',
+        f'{PARAM_DIR}/superblue12.json',
         f'{PARAM_DIR}/superblue14.json',
         f'{PARAM_DIR}/superblue16.json',
         f'{PARAM_DIR}/superblue19.json',
@@ -174,7 +184,7 @@ if __name__ == '__main__':
     args = parse_pretrain_args()
     args.lr = 5e-5
     name = args.name
-    args.name = "pretrain_"+name
+    args.name = name
     b=time.time()
     pretrain_ours(
         args=args,

@@ -49,7 +49,7 @@ def create_input_graph_file(
 def overlap(func):
     def fn2(graph,belong,blocks):
         result = func(graph,belong,blocks)
-        if not os.path.exists("/root/DREAMPlace/time/overlap_ratio.json"):
+        if not os.path.exists("/root/transferable/DREAMPlace/time/overlap_ratio.json"):
             return result
         
         num_nets = graph.num_nodes('net')
@@ -68,12 +68,12 @@ def overlap(func):
                         continue
                 overlap_ratio += tmp_cnt * 1.0 / num_nets
 
-        with open("/root/DREAMPlace/time/overlap_ratio.json","r") as f:
+        with open("/root/transferable/DREAMPlace/time/overlap_ratio.json","r") as f:
             data = json.load(f)
         for k,v in data.items():
             if v == -1:
                 data[k] = overlap_ratio
-                with open("/root/DREAMPlace/time/overlap_ratio.json","w") as f:
+                with open("/root/transferable/DREAMPlace/time/overlap_ratio.json","w") as f:
                     f.write(json.dumps(data))
                 break
         return result

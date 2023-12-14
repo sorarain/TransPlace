@@ -162,8 +162,8 @@ class NonLinearPlace(BasicPlace.BasicPlace):
                 # stopping criteria
                 def Lgamma_stop_criterion(Lgamma_step, metrics, stop_mask=None):
                     ################
-                    if hasattr(params,'init_pos_dir'):
-                        return False
+                    # if hasattr(params,'init_pos_dir'):
+                    #     return False
                     ################
                     with torch.no_grad():
                         if len(metrics) > 1:
@@ -196,7 +196,7 @@ class NonLinearPlace(BasicPlace.BasicPlace):
                                 logging.debug("All regions stop updating, finish global placement")
                                 return True
                         # a heuristic to detect divergence and stop early
-                        if len(metrics) > 50:
+                        if len(metrics) > 50 and best_metric[0] is not None:
                             cur_metric = metrics[-1][-1][-1]
                             prev_metric = metrics[-50][-1][-1]
                             # record HPWL and overflow increase, and check divergence
@@ -209,8 +209,8 @@ class NonLinearPlace(BasicPlace.BasicPlace):
 
                 def Llambda_stop_criterion(Lgamma_step, Llambda_density_weight_step, metrics):
                     ################
-                    if hasattr(params,'init_pos_dir'):
-                        return False
+                    # if hasattr(params,'init_pos_dir'):
+                    #     return False
                     ################
                     with torch.no_grad():
                         if len(metrics) > 1:
@@ -242,8 +242,8 @@ class NonLinearPlace(BasicPlace.BasicPlace):
 
                 def Lsub_stop_criterion(Lgamma_step, Llambda_density_weight_step, Lsub_step, metrics):
                     ################
-                    if hasattr(params,'init_pos_dir'):
-                        return False
+                    # if hasattr(params,'init_pos_dir'):
+                    #     return False
                     ################
                     with torch.no_grad():
                         if len(metrics) >= moving_avg_window * 2:
@@ -333,10 +333,15 @@ class NonLinearPlace(BasicPlace.BasicPlace):
 
                     logging.info("optimizer step %.3f ms" % ((time.time() - t3) * 1000))
 
+                    flag = iteration > 500
+                    if "st_overflow" in params.__dict__ and params.__dict__["st_overflow"] > 0:
+                        flag = model.overflow < params.__dict__["st_overflow"]
+                    elif "st_iteration" in params.__dict__ and params.__dict__["st_iteration"] > 0:
+                        flag = iteration > params.__dict__["st_iteration"]
                     # Perform timing-opt.
                     if params.global_place_flag and params.timing_opt_flag and \
                         params.enable_net_weighting and \
-                        iteration > 500 and iteration % 15 == 0:
+                        flag and iteration % 15 == 0:
                         # Take the timing operator from the operator collections.
                         cur_pos = self.pos[0].data.clone().cpu().numpy()
                         # The timing operator has already integrated timer as its
@@ -382,8 +387,8 @@ class NonLinearPlace(BasicPlace.BasicPlace):
 
                 def check_plateau(x, window=10, threshold=0.001):
                     ################
-                    if hasattr(params,'init_pos_dir'):
-                        return False
+                    # if hasattr(params,'init_pos_dir'):
+                    #     return False
                     ################
                     if len(x) < window:
                         return False
@@ -392,8 +397,8 @@ class NonLinearPlace(BasicPlace.BasicPlace):
 
                 def check_divergence(x, window=50, threshold=0.05):
                     ################
-                    if hasattr(params,'init_pos_dir'):
-                        return False
+                    # if hasattr(params,'init_pos_dir'):
+                    #     return False
                     ################
                     if len(x) < window or best_metric[0] is None:
                         return False
@@ -576,10 +581,14 @@ class NonLinearPlace(BasicPlace.BasicPlace):
                             break
 
                         # for routability optimization
+                        if len(Llambda_metrics[-1][-1].overflow) > 1:
+                            overflow = Llambda_metrics[-1][-1].goverflow
+                        else:
+                            overflow = Llambda_metrics[-1][-1].overflow
                         if (
                             params.routability_opt_flag
                             and num_area_adjust < params.max_num_area_adjust
-                            and Llambda_metrics[-1][-1].overflow < params.node_area_adjust_overflow
+                            and overflow < params.node_area_adjust_overflow
                         ):
                             content = (
                                 "routability optimization round %d: adjust area flags = (%d, %d, %d)"

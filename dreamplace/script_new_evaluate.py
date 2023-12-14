@@ -30,9 +30,45 @@ FIG_DIR = 'visualize/pretrain'
 MODEL_DIR = 'model'
 NETLIST_DIR='benchmarks'
 PARAM_DIR='test/OurModel_lowepoch_NAG'
+# PARAM_DIR = 'test/ours_dac2012'
 # PARAM_DIR='test/dac2012'
 # PARAM_DIR='test/ispd2015/lefdef'
 # PARAM_DIR='test/ispd2005'
+
+def report_routing(netlist_name,def_path):
+    tech_path = os.path.join(NETLIST_DIR,"ispd2015",netlist_name,"tech.lef")
+    cells_path = os.path.join(NETLIST_DIR,"ispd2015",netlist_name,"cells.lef")
+    with open("./routing.tcl","w") as f:
+        f.write(f"read_lef {tech_path}\n")
+        f.write(f"read_lef {cells_path}\n")
+        f.write(f"read_def {def_path}\n")
+        f.write("global_route -congestion_iterations 5 -congestion_report_iter_step 5 -allow_congestion -verbose")
+    os.system(f"openroad -exit ./routing.tcl > {def_path.replace('.gp.def','.grt.log')}")
+
+def add_route(params):
+    params.__dict__["routability_opt_flag"] = 1
+    params.__dict__["adjust_nctugr_area_flag"] = 0
+    params.__dict__["adjust_pin_area_flag"] = 0
+    params.__dict__["routability_opt_flag"] = 1
+    params.__dict__["max_num_area_adjust"] = 5
+    params.__dict__["route_num_bins_x"] = 800
+    params.__dict__["route_num_bins_y"] = 415
+    params.__dict__["node_area_adjust_overflow"] = 0.20
+    params.__dict__["area_adjust_stop_ratio"] = 0.01
+    params.__dict__["route_area_adjust_stop_ratio"] = 0.01
+    params.__dict__["pin_area_adjust_stop_ratio"] = 0.05
+    params.__dict__["unit_horizontal_capacity"] = 50
+    params.__dict__["unit_vertical_capacity"] = 58
+    params.__dict__["unit_pin_capacity"] = 100
+    params.__dict__["max_route_opt_adjust_rate"] = 2.5
+    params.__dict__["route_opt_adjust_exponent"] = 2.5
+    params.__dict__["pin_stretch_ratio"] = 1.414213562
+    params.__dict__["max_pin_opt_adjust_rate"] = 1.5
+    params.__dict__["global_place_stages"][0]["Llambda_density_weight_iteration"] = 1
+    params.__dict__["global_place_stages"][0]["Lsub_iteration"] = 1
+    params.__dict__["global_place_stages"][0]["routability_Lsub_iteration"] = 5
+    params.__dict__["stop_overflow"] = 0.1
+    return params
 
 def rotate(x, y, theta):
     theta = np.pi / 180
@@ -98,6 +134,9 @@ if __name__ == '__main__':
         # f'{PARAM_DIR}/ispd19_test1/ispd19_test1.json',
         # f'{PARAM_DIR}/mgc_superblue19/mgc_superblue19.json',
         # f'{PARAM_DIR}/mgc_des_perf_1.json',
+        # f'{PARAM_DIR}/mgc_des_perf_a.json',
+        # f'{PARAM_DIR}/mgc_des_perf_b.json',
+        # f'{PARAM_DIR}/mgc_edit_dist_a.json',
         # f'{PARAM_DIR}/mgc_fft_1.json',
         # f'{PARAM_DIR}/mgc_fft_2.json',
         # f'{PARAM_DIR}/mgc_fft_a.json',
@@ -105,8 +144,12 @@ if __name__ == '__main__':
         # f'{PARAM_DIR}/mgc_matrix_mult_1.json',
         # f'{PARAM_DIR}/mgc_matrix_mult_2.json',
         # f'{PARAM_DIR}/mgc_matrix_mult_a.json',
-        # f'{PARAM_DIR}/mgc_superblue12.json',
+        # f'{PARAM_DIR}/mgc_pci_bridge32_a.json',
+        # f'{PARAM_DIR}/mgc_pci_bridge32_b.json',
+        # f'{PARAM_DIR}/mgc_superblue11_a.json',
+        f'{PARAM_DIR}/mgc_superblue12.json',
         # f'{PARAM_DIR}/mgc_superblue14.json',
+        f'{PARAM_DIR}/mgc_superblue16_a.json',
         # f'{PARAM_DIR}/mgc_superblue19.json',
         # f'{PARAM_DIR}/ispd19_test1.json',
         # f'{PARAM_DIR}/ispd19_test2.json',
@@ -117,17 +160,17 @@ if __name__ == '__main__':
         # f'{PARAM_DIR}/ispd19_test8.json',
         # f'{PARAM_DIR}/ispd19_test9.json',
         # f'{PARAM_DIR}/ispd19_test10.json',
-        f'{PARAM_DIR}/superblue1.json',
-        f'{PARAM_DIR}/superblue2.json',
-        f'{PARAM_DIR}/superblue3.json',
-        f'{PARAM_DIR}/superblue6.json',
-        f'{PARAM_DIR}/superblue7.json',
-        f'{PARAM_DIR}/superblue9.json',
-        f'{PARAM_DIR}/superblue11.json',
-        f'{PARAM_DIR}/superblue12.json',
-        f'{PARAM_DIR}/superblue14.json',
-        f'{PARAM_DIR}/superblue16.json',
-        f'{PARAM_DIR}/superblue18.json',
+        # f'{PARAM_DIR}/superblue1.json',
+        # f'{PARAM_DIR}/superblue2.json',
+        # f'{PARAM_DIR}/superblue3.json',
+        # f'{PARAM_DIR}/superblue6.json',
+        # f'{PARAM_DIR}/superblue7.json',
+        # f'{PARAM_DIR}/superblue9.json',
+        # f'{PARAM_DIR}/superblue11.json',
+        # f'{PARAM_DIR}/superblue12.json',
+        # f'{PARAM_DIR}/superblue14.json',
+        # f'{PARAM_DIR}/superblue16.json',
+        # f'{PARAM_DIR}/superblue18.json',
         # f'{PARAM_DIR}/superblue19.json',
         # f'{PARAM_DIR}/adaptec1.json',
         # f'{PARAM_DIR}/adaptec2.json',
@@ -141,6 +184,9 @@ if __name__ == '__main__':
     test_netlist_names = [
         # f'{NETLIST_DIR}/dac2012/superblue2'
         # f'{NETLIST_DIR}/ispd2015/mgc_des_perf_1',
+        # f'{NETLIST_DIR}/ispd2015/mgc_des_perf_a',
+        # f'{NETLIST_DIR}/ispd2015/mgc_des_perf_b',
+        # f'{NETLIST_DIR}/ispd2015/mgc_edit_dist_a',
         # f'{NETLIST_DIR}/ispd2015/mgc_fft_1',
         # f'{NETLIST_DIR}/ispd2015/mgc_fft_2',
         # f'{NETLIST_DIR}/ispd2015/mgc_fft_a',
@@ -148,8 +194,12 @@ if __name__ == '__main__':
         # f'{NETLIST_DIR}/ispd2015/mgc_matrix_mult_1',
         # f'{NETLIST_DIR}/ispd2015/mgc_matrix_mult_2',
         # f'{NETLIST_DIR}/ispd2015/mgc_matrix_mult_a',
-        # f'{NETLIST_DIR}/ispd2015/mgc_superblue12',
+        # f'{NETLIST_DIR}/ispd2015/mgc_pci_bridge32_a',
+        # f'{NETLIST_DIR}/ispd2015/mgc_pci_bridge32_b',
+        # f'{NETLIST_DIR}/ispd2015/mgc_superblue11_a',
+        f'{NETLIST_DIR}/ispd2015/mgc_superblue12',
         # f'{NETLIST_DIR}/ispd2015/mgc_superblue14',
+        f'{NETLIST_DIR}/ispd2015/mgc_superblue16_a',
         # f'{NETLIST_DIR}/ispd2015/mgc_superblue19',
         # f'{NETLIST_DIR}/ispd2019/ispd19_test1',
         # f'{NETLIST_DIR}/ispd2019/ispd19_test2',
@@ -160,17 +210,17 @@ if __name__ == '__main__':
         # f'{NETLIST_DIR}/ispd2019/ispd19_test8',
         # f'{NETLIST_DIR}/ispd2019/ispd19_test9',
         # f'{NETLIST_DIR}/ispd2019/ispd19_test10',
-        f'{NETLIST_DIR}/dac2012/superblue1',
-        f'{NETLIST_DIR}/dac2012/superblue2',
-        f'{NETLIST_DIR}/dac2012/superblue3',
-        f'{NETLIST_DIR}/dac2012/superblue6',
-        f'{NETLIST_DIR}/dac2012/superblue7',
-        f'{NETLIST_DIR}/dac2012/superblue9',
-        f'{NETLIST_DIR}/dac2012/superblue11',
-        f'{NETLIST_DIR}/dac2012/superblue12',
-        f'{NETLIST_DIR}/dac2012/superblue14',
-        f'{NETLIST_DIR}/dac2012/superblue16',
-        f'{NETLIST_DIR}/dac2012/superblue18',
+        # f'{NETLIST_DIR}/dac2012/superblue1',
+        # f'{NETLIST_DIR}/dac2012/superblue2',
+        # f'{NETLIST_DIR}/dac2012/superblue3',
+        # f'{NETLIST_DIR}/dac2012/superblue6',
+        # f'{NETLIST_DIR}/dac2012/superblue7',
+        # f'{NETLIST_DIR}/dac2012/superblue9',
+        # f'{NETLIST_DIR}/dac2012/superblue11',
+        # f'{NETLIST_DIR}/dac2012/superblue12',
+        # f'{NETLIST_DIR}/dac2012/superblue14',
+        # f'{NETLIST_DIR}/dac2012/superblue16',
+        # f'{NETLIST_DIR}/dac2012/superblue18',
         # f'{NETLIST_DIR}/dac2012/superblue19',
         # f'{NETLIST_DIR}/ispd2005/adaptec1',
         # f'{NETLIST_DIR}/ispd2005/adaptec2',
@@ -183,8 +233,8 @@ if __name__ == '__main__':
     ]
     ############Train
     args = parse_train_args()
-    test_netlist_names = [f'{NETLIST_DIR}/dac2012/superblue{args.no}']
-    test_param_json_list = [f'{PARAM_DIR}/superblue{args.no}.json']
+    # test_netlist_names = [f'{NETLIST_DIR}/dac2012/superblue{args.no}']
+    # test_param_json_list = [f'{PARAM_DIR}/superblue{args.no}.json']
     generate_data_list(test_netlist_names,test_param_json_list)
     result = {}
 
@@ -225,17 +275,17 @@ if __name__ == '__main__':
     result_ = {}
     if not jump_dreamplace:
         block = 4
-        block_x = 2
+        block_x = 4
         block_step_x = 10
-        block_y = 2
+        block_y = 4
         block_step_y = 10
-        for idx_x in range(block_x):
-            for idx_y in range(block_y):
-                for idx in range(block):
-                    idx_x_ = idx_x - block_x / 2
-                    idx_y_ = idx_y - block_y / 2
-                    theta = idx * 360.0 / block
-                    for netlist_dir,param_dir in zip(test_netlist_names,test_param_json_list):
+        for netlist_dir,param_dir in zip(test_netlist_names,test_param_json_list):
+            for idx_x in range(block_x):
+                for idx_y in range(block_y):
+                    for idx in range(block):
+                        idx_x_ = idx_x - block_x / 2
+                        idx_y_ = idx_y - block_y / 2
+                        theta = idx * 360.0 / block
                         if not os.path.exists(param_dir):
                             create_param_json(netlist_dir,param_dir)
                         params = Params.Params()
@@ -246,6 +296,10 @@ if __name__ == '__main__':
                         # params.__dict__["detailed_place_flag"] = 0
                         params.__dict__["adjust_nctugr_area_flag"] = 0
                         params.__dict__["adjust_rudy_area_flag"] = 1
+                        params = add_route(params)
+                        netlist_name = netlist_dir.split('/')[-1]
+                        params.__dict__["init_pos_dir"] = f'./result/{args.name}/{netlist_name}/{netlist_name}_translate_x{str(idx_x_ * block_step_x)}_y{str(idx_y_ * block_step_y)}_rotate{int(theta)}.npy'
+                        params.__dict__["save_gp_dir"] = f"./result/{args.name}/{netlist_name}/{netlist_name}_translate_x{str(idx_x_ * block_step_x)}_y{str(idx_y_ * block_step_y)}_rotate{int(theta)}"
                         placedb = PlaceDB.PlaceDB()
                         placedb(params)
                         netlist_name = netlist_dir.split('/')[-1]
@@ -277,11 +331,50 @@ if __name__ == '__main__':
                         result_[netlist_name + f"_translate_x{str(idx_x_ * block_step_x)}_y{str(idx_y_ * block_step_y)}" + f"_rotate{int(theta)}"]["dreamplace time"] = float(metrics[-1].optimizer_time)
                         result_[netlist_name + f"_translate_x{str(idx_x_ * block_step_x)}_y{str(idx_y_ * block_step_y)}" + f"_rotate{int(theta)}"]["eval time"] = float(metrics[-1].optimizer_time) + float(result[netlist_name]["eval time"])
                         result_[netlist_name + f"_translate_x{str(idx_x_ * block_step_x)}_y{str(idx_y_ * block_step_y)}" + f"_rotate{int(theta)}"]["epochs"] = len(metrics)
+                        def_path = f"./result/{args.name}/{netlist_name}/{netlist_name}_translate_x{str(idx_x_ * block_step_x)}_y{str(idx_y_ * block_step_y)}_rotate{int(theta)}.gp.def"
+                        report_routing(netlist_name, def_path)
+                        if not (netlist_name in result_):
+                            result_[netlist_name] = {}
+                            result_[netlist_name]['overflow'] = 1e9
+                            result_[netlist_name]['name'] = 1e9
+                        flag = True
+                        with open(def_path.replace('.gp.def','.grt.log'),"r") as f:
+                            for line in f:
+                                if line.startswith("Total     "):
+                                    tmp_overflow = int(line.split(" ")[-1])
+                            if tmp_overflow < result_[netlist_name]['overflow']:
+                                result_[netlist_name]['overflow'] = tmp_overflow
+                                result_[netlist_name]['name'] = def_path
+                                flag = False
+                                os.system(f"cp {def_path} ./result/{args.name}/{netlist_name}/ours_best_{netlist_name}.gp.def")
+                        if flag:
+                            os.system(f"rm -rf {def_path}")
+                            os.system(f"rm -rf {def_path.replace('.gp.def','.npy')}")
+
+
+                        # ofinfo_path = os.path.join('./result',args.name,netlist_name,netlist_name + '_translate_x'+ str(idx_x_ * block_step_x) + '_y'+ str(idx_y_ * block_step_y) + '_rotate' + str(int(theta))) + '.gr.ofinfo'
+                        # pl_path = os.path.join('./result',args.name,netlist_name,netlist_name + '_translate_x'+ str(idx_x_ * block_step_x) + '_y'+ str(idx_y_ * block_step_y) + '_rotate' + str(int(theta))) + '.gp.pl'
+                        # os.system(f"./NCTUgr ICCAD {os.path.join(netlist_dir,netlist_name + '.aux')} {os.path.join('./result',args.name,netlist_name,netlist_name + '_translate_x'+ str(idx_x_ * block_step_x) + '_y'+ str(idx_y_ * block_step_y) + '_rotate' + str(int(theta))) + '.gp.pl'} DAC12.set {os.path.join('./result',args.name,netlist_name,netlist_name + '_translate_x'+ str(idx_x_ * block_step_x) + '_y'+ str(idx_y_ * block_step_y) + '_rotate' + str(int(theta))) + '.gr'}")
+                        # with open(ofinfo_path,"r") as f:
+                        #     for line in f:
+                        #         if line.startswith("Total overflow"):
+                        #             tmp_overflow = int(line.split(" ")[-1])
+                        #     if tmp_overflow < result_[netlist_name]['overflow']:
+                        #         result_[netlist_name]['overflow'] = tmp_overflow
+                        #         result_[netlist_name]['name'] = pl_path
+                        #         os.system(f"cp {pl_path} ./result/{args.name}/{netlist_name}/ours_best_{netlist_name}.gp.pl")
+                        #         os.system(f"cp {ofinfo_path} ./result/{args.name}/{netlist_name}/ours_best_{netlist_name}.gr.ofinfo")
+                        #         os.system(f"cp {ofinfo_path.replace('.ofinfo','')} ./result/{args.name}/{netlist_name}/ours_best_{netlist_name}.gr")
+                        # os.system(f"rm -rf {ofinfo_path}")
+                        # os.system(f"rm -rf {pl_path}")
+                        # os.system(f"rm -rf {ofinfo_path.replace('.ofinfo','')}")
+                        # os.system(f"rm -rf {pl_path.replace('.gp.pl','.npy')}")
                     with open("./exam_new.json","w") as f:
                         jsoncontent = json.dumps(result_)
                         f.write(jsoncontent)
     print(result_)
-    # with open(f"./result/{args.name}/result_modelispd2015_ispd2019_ourmodel.json","w") as f:
+    # result = result_
+    # with open(f"./result/{args.name}/result_dac2012_fine-tune_time_8.json","w") as f:
     #     for k,v in result.items():
     #         for k_,v_ in v.items():
     #             v[k_] = float(v_)
@@ -299,4 +392,4 @@ if __name__ == '__main__':
     #             else:
     #                 tmp_result.append(float(result[key][result_name]))
     #         df[result_name] = tmp_result
-    #     df.to_excel(f"./result/{args.name}/result_modelispd2015_ispd2019_ourmodel.xlsx",index=False)
+    #     df.to_excel(f"./result/{args.name}/result_dac2012_fine-tune_time_8.xlsx",index=False)

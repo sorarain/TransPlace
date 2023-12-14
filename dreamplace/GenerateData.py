@@ -26,6 +26,7 @@ from grouping import create_group
 import os.path as osp
 from dreamplace import NonLinearPlace
 import json
+import Timer
 
 def generate_data(netlist_dir:str,params,save_type=1,for_test=False):
     data_file_list = ['cell_pos.npy', 'cell_data.npy','net_data.npy','pin_data.npy','pin_net_cell.npy','cell_clusters.json','layout_size.json']
@@ -46,7 +47,7 @@ def generate_data(netlist_dir:str,params,save_type=1,for_test=False):
                 cells_type = torch.zeros([placedb.num_physical_nodes,1])
                 fix_node_index_list = list(placedb.rawdb.fixedNodeIndices())
                 for i in range(placedb.num_physical_nodes):
-                    cells_size[i] = torch.tensor([placedb.node_size_x[i],placedb.node_size_y[i]])
+                    cells_size[i] = torch.tensor([placedb.node_size_x[i],placedb.node_size_y[i]]) + 1e-5
                     if i in range(placedb.num_movable_nodes):
                         cells_type[i] = 0
                     elif i in fix_node_index_list:
@@ -64,7 +65,12 @@ def generate_data(netlist_dir:str,params,save_type=1,for_test=False):
                 netlist_name = netlist_dir.split("/")[-1]
                 os.system(f"mkdir -p ./result/DREAMPlaceGP/{netlist_name}")
                 params.__dict__["save_gp_dir"] = f"./result/DREAMPlaceGP/{netlist_name}/{netlist_name}"
-                placer = NonLinearPlace.NonLinearPlace(params, placedb,None)
+                timer = None
+                if params.timing_opt_flag:
+                    timer = Timer.Timer()
+                    timer(params, placedb)
+                    timer.update_timing()
+                placer = NonLinearPlace.NonLinearPlace(params, placedb,timer)
                 metrics = placer(params, placedb)
                 node_x,node_y = placedb.node_x,placedb.node_y
                 np.save(osp.join(netlist_dir,data_file_name),np.stack([node_x,node_y],axis=1))
@@ -96,7 +102,7 @@ def generate_data(netlist_dir:str,params,save_type=1,for_test=False):
                 cells_type = torch.zeros([placedb.num_physical_nodes,1])
                 fix_node_index_list = list(placedb.rawdb.fixedNodeIndices())
                 for i in range(placedb.num_physical_nodes):
-                    cells_size[i] = torch.tensor([placedb.node_size_x[i],placedb.node_size_y[i]])
+                    cells_size[i] = torch.tensor([placedb.node_size_x[i],placedb.node_size_y[i]]) + 1e-5
                     if i in range(placedb.num_movable_nodes):
                         cells_type[i] = 0
                     elif i in fix_node_index_list:

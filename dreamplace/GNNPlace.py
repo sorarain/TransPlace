@@ -118,10 +118,10 @@ class GNNPlace():
             print(f'\tUsing model {dir_name}')
             model_dicts = torch.load(f'{dir_name}', map_location=device)
             tmp_OrderedDict = collections.OrderedDict()
-            # for name,v in model_dicts.items():
-            #     new_name = name.replace("pins.bias","pins.fc_self.bias").replace("points-to.bias","points-to.fc_self.bias")
-            #     tmp_OrderedDict[new_name] = v
-            self.model.load_state_dict(model_dicts)
+            for name,v in model_dicts.items():
+                new_name = name.replace("pins.bias","pins.fc_self.bias").replace("points-to.bias","points-to.fc_self.bias")
+                tmp_OrderedDict[new_name] = v
+            self.model.load_state_dict(tmp_OrderedDict)
             self.model.eval()
     
     

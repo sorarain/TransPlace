@@ -72,7 +72,7 @@ class GNNPlaceDB(PlaceDB):
             cells_type = torch.zeros([self.num_physical_nodes,1])
             fix_node_index_list = list(self.rawdb.fixedNodeIndices())
             for i in range(self.num_physical_nodes):
-                cells_size[i] = torch.tensor([self.node_size_x[i],self.node_size_y[i]])
+                cells_size[i] = torch.tensor([self.node_size_x[i],self.node_size_y[i]])  + 1e-5
                 if i in range(self.num_movable_nodes):
                     cells_type[i] = 0
                 elif i in fix_node_index_list:

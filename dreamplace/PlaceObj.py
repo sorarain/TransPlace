@@ -246,8 +246,8 @@ class PlaceObj(nn.Module):
                 params, placedb, self.data_collections)
             self.op_collections.pin_utilization_map_op = self.build_pin_utilization_map(
                 params, placedb, self.data_collections)
-            self.op_collections.nctugr_congestion_map_op = self.build_nctugr_congestion_map(
-                params, placedb, self.data_collections)
+            # self.op_collections.nctugr_congestion_map_op = self.build_nctugr_congestion_map(
+            #     params, placedb, self.data_collections)
             # adjust instance area with congestion map
             self.op_collections.adjust_node_area_op = self.build_adjust_node_area(
                 params, placedb, self.data_collections)
@@ -288,22 +288,22 @@ class PlaceObj(nn.Module):
         self.loss_list = []
         ############ add anchor loss
 ############ add anchor loss
-    @property
-    def anchor_pos(self):
-        if self._anchor_pos is not None:
-            return self._anchor_pos
-        self._anchor_pos = np.zeros(self.num_nodes * 2, dtype=self.dtype)
-        self._anchor_pos[0:self.num_physical_nodes] = self.node_x
-        self._anchor_pos[self.num_nodes:self.num_nodes +
-                      self.num_physical_nodes] = self.node_y
-        # netlist_name = sys.argv[1].split('/')[-1].split('.')[0]
-        init_pos = np.load(self.params.init_pos_dir)#test-traincellflow
-        self._anchor_pos[0:self.num_movable_nodes] = init_pos[:self.num_movable_nodes,0]
-        self._anchor_pos[self.num_nodes:self.num_nodes + 
-                        self.num_movable_nodes] = init_pos[:self.num_movable_nodes,1]
-        self._anchor_pos = torch.from_numpy(self._anchor_pos).to(self.data_collections.pos[0].device)
-        # self._anchor_pos = self.op_collections.legalize_op(self._anchor_pos)
-        return self._anchor_pos
+    # @property
+    # def anchor_pos(self):
+    #     if self._anchor_pos is not None:
+    #         return self._anchor_pos
+    #     self._anchor_pos = np.zeros(self.num_nodes * 2, dtype=self.dtype)
+    #     self._anchor_pos[0:self.num_physical_nodes] = self.node_x
+    #     self._anchor_pos[self.num_nodes:self.num_nodes +
+    #                   self.num_physical_nodes] = self.node_y
+    #     # netlist_name = sys.argv[1].split('/')[-1].split('.')[0]
+    #     init_pos = np.load(self.params.init_pos_dir)#test-traincellflow
+    #     self._anchor_pos[0:self.num_movable_nodes] = init_pos[:self.num_movable_nodes,0]
+    #     self._anchor_pos[self.num_nodes:self.num_nodes + 
+    #                     self.num_movable_nodes] = init_pos[:self.num_movable_nodes,1]
+    #     self._anchor_pos = torch.from_numpy(self._anchor_pos).to(self.data_collections.pos[0].device)
+    #     # self._anchor_pos = self.op_collections.legalize_op(self._anchor_pos)
+    #     return self._anchor_pos
 
 ############ add anchor loss
 
@@ -334,8 +334,8 @@ class PlaceObj(nn.Module):
         else:
             result = torch.add(self.wirelength, self.density, alpha=(self.density_factor * self.density_weight).item())
         ############ add anchor loss
-        anchor_loss = 0
-        if hasattr(self.params,'init_pos_dir'):
+        # anchor_loss = 0
+        # if hasattr(self.params,'init_pos_dir'):
             # delta = torch.nn.functional.leaky_relu(torch.abs(pos - self.anchor_pos) - self.anchor,negative_slope=0.01)
             # # self.anchor_weight = float(self.density_factor * self.density_weight)
             # # anchor_loss = torch.nn.functional.l1_loss(torch.ones_like(delta,device=pos.device)*-1e4,delta,reduction='sum')
@@ -343,7 +343,7 @@ class PlaceObj(nn.Module):
             # result = torch.add(result,anchor_loss,alpha = self.anchor_weight)
             # self.anchor_weight*=0.98
             # self.anchor_list.append(float(anchor_loss / self.num_physical_nodes))
-            anchor_loss *= self.anchor_weight 
+            # anchor_loss *= self.anchor_weight 
         # self.loss_list.append([float(self.wirelength),float(self.density),float(self.density_factor * self.density_weight)])
             # logging.info(f"anchor loss {(anchor_loss * self.anchor_weight).data}")
             # logging.info(f"wirelength loss {self.wirelength.data}")
